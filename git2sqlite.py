@@ -33,7 +33,7 @@ def get_db_path(proposed_path):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog="commits2sqlite",
+    parser = argparse.ArgumentParser(prog="git2sqlite",
                                      description="Extracts data from an AZDO git repo and loads it into a SQLite file")
     parser.add_argument('-o', '--org',
                         help="The Azure DevOps Organization. Defaults to 'slb-it' if not omitted.")

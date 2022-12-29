@@ -4,7 +4,7 @@ git2sqlite
 Extracts commit data from an Azure DevOps Git repo and stores it in an SQLite database
 
 ```
-usage: commits2sqlite [-h] [-o ORG] [-p PROJECT] [-r REPO] [-d DB_FILE] [-f FROM_DATE] [-t PAT_TOKEN] [-s]
+usage: git2sqlite [-h] [-o ORG] [-p PROJECT] [-r REPO] [-d DB_FILE] [-f FROM_DATE] [-t PAT_TOKEN] [-s]
 
 Extracts data from an AZDO git repo and loads it into a SQLite file
 
@@ -23,5 +23,13 @@ options:
   -s, --synchronize     Specifies that all repositories will be updated since the last moddified value of the committer_date value in the commits table. If set, then --from-date and --repo are ignored.
   ```
 
-  <hr>
+Installation
+==
+
+
+```
+python -m pip install 'git2sqlite @ git+https://github.com/slmcmahon/git2sqlite@9a17c72a0be4e9e4c758999464d27b31a90aa711'
+```
+
+---
   This is a work in progress
