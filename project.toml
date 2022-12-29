@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name="git2sqlite"
+description="Tool for importing AZDO Git repositories into SQLite"
+readme="README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+classifiers=[
+    "Programming Language :: Python :: 3.8",
+    "Operating System :: OS Independent",
+]
+dependencies=[
+    "moment",
+    "requests",
+    "argparse"
+]
+[project.scripts]
+git2sqlite = "git2sqlite:main"
