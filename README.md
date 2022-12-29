@@ -58,7 +58,7 @@ For now:
 python -m pip install 'git2sqlite @ git+https://github.com/slmcmahon/git2sqlite@9a17c72a0be4e9e4c758999464d27b31a90aa711'
 ```
 
-Know Issues
+Known Issues
 ==
 * Nothing prevents adding commits to a database that was created for a different project.
 * Currently you must provide a value for --from-date or the app will crash.
