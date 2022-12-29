@@ -44,7 +44,7 @@ group by repo_name
 order by repo_name
 """
 REPO_LAST_MODIFIED = """
-select max(committed_on) 
+select max(committer_date) 
 from commits 
 where repo_name = ?
 """

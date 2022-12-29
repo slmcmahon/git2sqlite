@@ -70,7 +70,7 @@ def main():
 
     db_path = get_db_path(args.db_path)
     if not db_path:
-        print(f'{sys.argv[4]} is not a valid path.  Exiting')
+        print(f'{args.db_path} is not a valid path.  Exiting')
         exit(1)
 
     print(f'Using DB Path: {db_path}')
