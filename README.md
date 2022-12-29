@@ -64,7 +64,6 @@ Known Issues
 * Others, I'm sure
 
 ## Near-term TODO:
-* Assume commits from the beginning of time when the --from-date is omitted
 * Improve error handling
 
 This is a work in progress
