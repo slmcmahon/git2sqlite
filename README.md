@@ -53,7 +53,7 @@ git2sqlite --org my-division --project big-project -d c:\data\big-project.sqlite
 Installation
 ==
 
-
+For now:
 ```
 python -m pip install 'git2sqlite @ git+https://github.com/slmcmahon/git2sqlite@9a17c72a0be4e9e4c758999464d27b31a90aa711'
 ```
