@@ -1,7 +1,8 @@
 from collections import namedtuple
 import sqlite3
-from .azdo_git import Commit, Change
-import moment
+from datetime import datetime, timedelta
+from app.azdo_git import Commit, Change
+from typing import collections
 
 COMMITS_TABLE = """create table if not exists commits (
     id text unique, 
@@ -57,7 +58,7 @@ class GitDB():
         self.db_path = db_path
         self.__init_db()
 
-    def add_commit(self, commit: Commit):
+    def add_commit(self, commit: Commit, changes: any):
         conn = self._get_connection()
         csr = conn.cursor()
         csr.execute(INSERT_COMMIT,
@@ -66,26 +67,33 @@ class GitDB():
                      commit.author_email, commit.author_date,
                      commit.committer_name,
                      commit.committer_email, commit.committer_date))
+        for change in changes:
+            csr.execute(INSERT_CHANGE,
+                        (change.commit_id, change.path, change.change_type))
         conn.commit()
         conn.close()
-        
+
     def add_change(self, change: Change):
         conn = self._get_connection()
         csr = conn.cursor()
         csr.execute(INSERT_CHANGE,
-                (change.commit_id, change.path, change.change_type))
+                    (change.commit_id, change.path, change.change_type))
         conn.commit()
         conn.close()
-        
+
+    def __add_seconds(dateString, s):
+        dt = datetime.strptime(dateString, '%Y-%m-%d %H:%M:%S')
+        return dt + timedelta(seconds=s)
+
     def existing_repos(self):
         conn = self._get_connection()
         csr = conn.cursor()
         csr.execute(EXISTING_REPOS)
         rows = csr.fetchall()
-        repos = [DbRepo(row[0], moment.date(row[1]).add(seconds=1).date) for row in rows]
+        repos = [DbRepo(row[0], self.__add_seconds(row[1], 1)) for row in rows]
         conn.close()
         return repos
-    
+
     def get_last_modified(self, repo):
         conn = self._get_connection()
         csr = conn.cursor()
@@ -94,9 +102,8 @@ class GitDB():
         conn.close()
         if not lmd:
             return lmd
-        return moment.date(lmd).add(seconds=1).date
-        
-        
+        return self.__add_seconds(lmd, 1)
+
     def __init_db(self):
         conn = self._get_connection()
         csr = conn.cursor()

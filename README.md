@@ -65,6 +65,5 @@ Known Issues
 
 ## Near-term TODO:
 * Improve error handling
-* Store commits and changes in a single transaction  
 
 This is a work in progress
