@@ -8,6 +8,7 @@ Commit = namedtuple(
     "Commit", "commit_id repo comment author_name author_email author_date committer_name committer_email committer_date")
 Change = namedtuple("Change", "commit_id path change_type")
 
+
 class AZDOGit():
     BASE_URL_FORMAT = 'https://dev.azure.com/{}/{}/_apis/git'
     PAGE_SIZE = 50
@@ -41,14 +42,15 @@ class AZDOGit():
                 url = self._get_url(repo, self.PAGE_SIZE, skip, date_from)
             else:
                 hasMore = False
-                
+
     def changes(self, repo, commit_id):
         url = f'{self.base_url}/repositories/{repo}/commits/{commit_id}/changes'
         data = self._get_data(url)
-        for cr in data['changes']:
-            item = cr['item']
-            if item['gitObjectType'] == 'blob':
-                yield Change(item['commitId'], item['path'], cr['changeType'])
+        return [
+            Change(commit_id=cr['item']['commitId'], path=cr['item']
+                   ['path'], change_type=cr['changeType'])
+            for cr in data['changes']
+            if cr['item']['gitObjectType'] == 'blob']
 
     def _get_url(self, repo, pagesize, skip, since):
         url = f'{self.base_url}/repositories/{repo}/commits?api-version=7.0&$top={pagesize}&$skip={skip}&searchCriteria.showOldestCommitsFirst=true'

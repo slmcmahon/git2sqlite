@@ -2,14 +2,14 @@ from collections import namedtuple
 import sys
 import os
 from os.path import exists
-import moment
+from datetime import datetime
 import argparse
 from app.azdo_git import AZDOGit
 from app.git_db import GitDB, DbRepo
 
 DEFAULT_PAT = os.environ['AZDO_PAT']
-DEFAULT_ORG = 'slb-it'
-DEFAULT_PROJECT = 'es-delivery-platform'
+DEFAULT_ORG = os.environ['AZDO_ORG']
+DEFAULT_PROJECT = os.environ['AZDO_PROJECT']
 DEFAULT_DB_PATH = os.path.join(os.path.expanduser('~'), 'gitlog.sqlite3')
 
 
@@ -62,6 +62,11 @@ def parse_args():
     if args.db_file:
         proposed_path = args.db_file.lstrip()
 
+    # Need to do something if values can't be determined for required args.
+
+    # if not org: raise ValueError('No value provided for --org')
+    # if not project: raise ValueError('No value provided for --project')
+
     return Args(org, project, repo, from_date, proposed_path, token, args.synchronize)
 
 
@@ -85,22 +90,20 @@ def main():
     else:
         from_date = None
         if args.from_date:
-            from_date = moment.date(args.from_date).date
+            from_date = datetime.strptime(args.from_date, '%Y-%m-%d')
         else:
             from_date = gitdb.get_last_modified(args.repo)
-        repo_list.append(DbRepo(args.repo,from_date))
+        repo_list.append(DbRepo(args.repo, from_date))
 
     for repo in repo_list:
         print(f'Checking for updates to {repo.name}...')
         for commit in git.commits(repo.name, repo.last_commit):
+            changes = git.changes(repo.name, commit.commit_id)
             print(
                 f'Adding commit {commit.commit_id} from {commit.author_email} on {commit.author_date}.')
-            gitdb.add_commit(commit)
-            for change in git.changes(repo.name, commit.commit_id):
-                print(f'  {change.change_type} for file: {change.path}.')
-                gitdb.add_change(change)
+            gitdb.add_commit(commit, changes)
+
         print(f'Database is up to date for {repo.name}.')
-        
 
 
 if __name__ == '__main__':
