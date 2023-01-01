@@ -55,7 +55,7 @@ Installation
 
 For now:
 ```
-python -m pip install 'git2sqlite @ git+https://github.com/slmcmahon/git2sqlite@9a17c72a0be4e9e4c758999464d27b31a90aa711'
+python -m pip install 'git2sqlite @ git+https://github.com/slmcmahon/git2sqlite@c7d20e178ffb4bc7ac5298711511e40af632463c'
 ```
 
 Known Issues
