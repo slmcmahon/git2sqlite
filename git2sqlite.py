@@ -7,11 +7,6 @@ import argparse
 from app.azdo_git import AZDOGit
 from app.git_db import GitDB, DbRepo
 
-DEFAULT_PAT = os.environ['AZDO_PAT']
-DEFAULT_ORG = os.environ['AZDO_ORG']
-DEFAULT_PROJECT = os.environ['AZDO_PROJECT']
-DEFAULT_DB_PATH = os.path.join(os.path.expanduser('~'), 'gitlog.sqlite3')
-
 
 Args = namedtuple(
     "Args", "org project, repo from_date db_path token synchronize")
@@ -27,51 +22,65 @@ def get_db_path(proposed_path):
             actual_path = proposed_path
     except:
         print(
-            f'The proposed path {proposed_path} is not a valid path.  Using default: {DEFAULT_DB_PATH}.')
+            f'The proposed path {proposed_path} is not a valid path.')
         return None
     return actual_path
+
+
+def check_env_default(arg_value, arg_name, env_name):
+    if arg_value:
+        return arg_value.strip()
+    if env_name in os.environ:
+        return os.environ[env_name]
+    raise ValueError(f'No value provided for --{arg_name}.')
 
 
 def parse_args():
     parser = argparse.ArgumentParser(prog="git2sqlite",
                                      description="Extracts data from an AZDO git repo and loads it into a SQLite file")
     parser.add_argument('-o', '--org',
-                        help="The Azure DevOps Organization. Defaults to 'slb-it' if not omitted.")
+                        help="The Azure DevOps Organization. Will check for AZDO_ORG environment variable if omitted.")
     parser.add_argument('-p', '--project',
-                        help="The Azure DevOps Project.")
+                        help="The Azure DevOps Project.  Will check for AZDO_PROJECT environment variable if omitted")
     parser.add_argument('-r', '--repo',
                         help="The Git Repository.")
     parser.add_argument('-d', '--db-file',
-                        help="The SQLITE Database File to write to.  This file is created if it doesn't exist.")
+                        help="The SQLITE Database File to write to. This argument is required.",
+                        required=True)
     parser.add_argument('-f', '--from-date',
                         help='The date from which to load commits (e.g. 2022-02-01)')
     parser.add_argument('-t', '--pat-token',
-                        help="A Personal Access Token that allows read access to the Azure DevOps Project.  If this is not provided, then an 'AZDO_PAT' environment variable must be set.")
+                        help="""A Personal Access Token that allows read access to the Azure DevOps Project. 
+                                Will check for AZDO_PAT environment variable if omitted.""")
     parser.add_argument('-s', '--synchronize',
                         action='store_true',
-                        help='Specifies that all repositories will be updated since the last moddified value of the committer_date value in the commits table. If set, then --from-date and --repo are ignored.')
+                        help="""Specifies that all repositories will be updated since the last modified 
+                                value of the committer_date value in the commits table. If set, then 
+                                --from-date and --repo are ignored.""")
 
     args = parser.parse_args()
 
     proposed_path = None
-    org = args.org.lstrip() if args.org else DEFAULT_ORG
-    project = args.project.lstrip() if args.project else DEFAULT_PROJECT
-    token = args.pat_token.lstrip() if args.pat_token else DEFAULT_PAT
+
+    org = check_env_default(args.org, 'org', 'AZDO_ORG')
+    project = check_env_default(args.project, 'project', 'AZDO_PROJECT')
+    token = check_env_default(args.pat_token, 'token', 'AZDO_PAT')
+
     repo = args.repo.lstrip() if args.repo else None
     from_date = args.from_date.lstrip() if args.from_date else None
     if args.db_file:
         proposed_path = args.db_file.lstrip()
 
-    # Need to do something if values can't be determined for required args.
-
-    # if not org: raise ValueError('No value provided for --org')
-    # if not project: raise ValueError('No value provided for --project')
-
     return Args(org, project, repo, from_date, proposed_path, token, args.synchronize)
 
 
 def main():
-    args = parse_args()
+    args = None
+    try:
+        args = parse_args()
+    except ValueError as e:
+        print(e)
+        exit(1)
 
     db_path = get_db_path(args.db_path)
     if not db_path:
